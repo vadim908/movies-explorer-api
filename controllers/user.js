@@ -3,17 +3,17 @@ const jwt = require('jsonwebtoken');
 
 const { NODE_ENV, JWT_SECRET } = process.env;
 const User = require('../models/user');
-const IncorrentDataError = require('../errors/IncorrentDataError');
+const IncorrectDataError = require('../errors/IncorrectDataError');
 const NotFoundError = require('../errors/not-found-err');
 const IncorrentTokenError = require('../errors/incorrentTokenError');
-const RequestTimeOut = require('../errors/RequestTimeOut');
+const ConflictError = require('../errors/ConflictError');
 
 module.exports.infoUser = (req, res, next) => {
   User.findById({ _id: req.user._id })
     .orFail(() => new Error('NotFound'))
     .then((user) => {
       if (!user) {
-        throw new IncorrentDataError('Переданы некорректные данные');
+        throw new IncorrectDataError('Переданы некорректные данные');
       }
       res
         .status(200)
@@ -24,7 +24,7 @@ module.exports.infoUser = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        throw new IncorrentDataError('Переданы некорректные данные');
+        throw new IncorrectDataError('Переданы некорректные данные');
       } else if (err.message === 'NotFound') {
         throw new NotFoundError('Пользователь не найден');
       }
@@ -38,16 +38,18 @@ module.exports.updateProfill = (req, res, next) => {
   User.findByIdAndUpdate(req.user._id, { email, name }, { runValidators: true, new: true })
     .orFail(() => new Error('NotFound'))
     .then((user) => {
-      res.status(200).send({
+      res.send({
         email: user.email,
         name: user.name,
       });
     })
     .catch((err) => {
       if ((err.name === 'CastError') || (err.name === 'ValidationError')) {
-        throw new IncorrentDataError('Пользователь с указанным id не найден');
+        throw new IncorrectDataError('Пользователь с указанным id не найден');
       } else if (err.message === 'NotFound') {
         throw new NotFoundError('Ресурс не найден');
+      } else if (err.name === 'MongoError' && err.code === 11000) {
+        throw new ConflictError('Данный пользователь уже зарегистрирован');
       }
       next(err);
     })
@@ -84,9 +86,9 @@ module.exports.newUser = (req, res, next) => {
     }))
     .catch((err) => {
       if (err.name === 'MongoError' && err.code === 11000) {
-        throw new RequestTimeOut('Данный пользователь уже зарегистрирован');
+        throw new ConflictError('Данный пользователь уже зарегистрирован');
       } else if ((err.name === 'CastError') || (err.name === 'ValidationError')) {
-        throw new IncorrentDataError('Переданы некорректные данные');
+        throw new IncorrectDataError('Переданы некорректные данные');
       } else if (err.message === 'NotFound') {
         throw new NotFoundError('Ресурс не найден');
       }

@@ -1,8 +1,8 @@
-class RequestTimeOut extends Error {
+class ConflictError extends Error {
   constructor(message) {
     super(message);
     this.statusCode = 409;
   }
 }
 
-module.exports = RequestTimeOut;
+module.exports = ConflictError;

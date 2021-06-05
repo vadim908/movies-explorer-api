@@ -1,7 +1,7 @@
 const Movie = require('../models/movie');
-const IncorrentDataError = require('../errors/IncorrentDataError');
+const IncorrectDataError = require('../errors/IncorrectDataError');
 const NotFoundError = require('../errors/not-found-err');
-const IncorrentUserId = require('../errors/incorrentUserId');
+const ForbiddenError = require('../errors/ForbiddenError');
 
 module.exports.infoMovie = (req, res, next) => {
   Movie.find({ owner: req.user._id })
@@ -46,9 +46,9 @@ module.exports.addNewMovie = (req, res, next) => {
     .then((movie) => res.status(200).send(movie))
     .catch((err) => {
       if (err.name === 'CastError') {
-        throw new IncorrentDataError('Переданы некорректные данные');
+        throw new IncorrectDataError('Переданы некорректные данные');
       } else if (err.name === 'ValidationError') {
-        throw new IncorrentDataError('Переданы некорректные данные');
+        throw new IncorrectDataError('Переданы некорректные данные');
       }
       next(err);
     })
@@ -61,19 +61,19 @@ module.exports.delMovie = (req, res, next) => {
     .orFail(() => new Error('NotFound'))
     .then((movie) => {
       if (!movie) {
-        throw new NotFoundError('Карточка не найдена');
+        throw new NotFoundError('Фильм не найден');
       } else if (movie.owner.toString() === req.user._id) {
-        Movie.findOneAndRemove(movieId, { runValidators: true, new: true })
+        return Movie.deleteOne(movieId, { runValidators: true, new: true })
           .then(() => {
-            res.status(200).send(movie);
+            res.send(movie);
           });
       } else {
-        throw new IncorrentUserId(' У вас нет прав удалять данный фильм');
+        throw new ForbiddenError(' У вас нет прав удалять данный фильм');
       }
     })
     .catch((err) => {
       if ((err.name === 'CastError') || (err.name === 'ValidationError')) {
-        throw new IncorrentDataError('Переданы некорректные данные');
+        throw new IncorrectDataError('Переданы некорректные данные');
       } else if (err.message === 'NotFound') {
         throw new NotFoundError('Фильм не найден');
       }
