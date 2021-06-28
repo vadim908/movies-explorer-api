@@ -2,7 +2,7 @@ const express = require('express');
 require('dotenv').config();
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
-
+const cors = require('cors');
 const {
   PORT = 3000, BASE_PATH, BASE_URL, NODE_ENV,
 } = process.env;
@@ -24,6 +24,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(requestLogger);
+app.use(cors());
 app.use('/', require('./routes/index'));
 
 app.use(errorLogger);
