@@ -7,13 +7,15 @@ const {
   PORT = 3000, BASE_PATH, BASE_URL, NODE_ENV,
 } = process.env;
 const { errors } = require('celebrate');
+const { celebrate, Joi } = require('celebrate');
+const { newUser, login } = require('../controllers/user');
 
 const { requestLogger, errorLogger } = require('./middlewares/logger');
 const errorHeandler = require('./middlewares/error-heandler');
 
 const app = express();
 
-mongoose.connect(NODE_ENV === 'production' ? BASE_URL : 'mongodb://localhost:27017/DiplomDataBAse', {
+mongoose.connect('mongodb://localhost:27017/DiplomDataBAse', {
   useUnifiedTopology: true,
   useNewUrlParser: true,
   useCreateIndex: true,
@@ -25,6 +27,22 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(requestLogger);
 app.use(cors());
+
+app.post('/signup', celebrate({
+  body: Joi.object().keys({
+    email: Joi.string().required().email(),
+    name: Joi.string().required().min(2).max(30),
+    password: Joi.string().required(),
+  }),
+}), newUser);
+
+app.post('/signin', celebrate({
+  body: Joi.object().keys({
+    email: Joi.string().required().email(),
+    password: Joi.string().required(),
+  }),
+}), login);
+
 app.use('/', require('./routes/index'));
 
 app.use(errorLogger);
