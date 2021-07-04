@@ -51,12 +51,10 @@ const movieSchema = new mongoose.Schema({
   nameRU: {
     type: String,
     required: true,
-    match: /[а-яё\s]+$/iu,
   },
   nameEN: {
     type: String,
     required: true,
-    match: /[a-z\s]+$/iu,
   },
 });
 

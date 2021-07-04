@@ -32,14 +32,14 @@ router.post('/', celebrate({
       }
       return helpers.message('Невалидный url');
     }),
-    movieId: Joi.string().required(),
-    nameRU: Joi.string().required().regex(/[а-яё\s]+$/iu),
-    nameEN: Joi.string().required().regex(/[a-z\s]+$/iu),
+    movieId: Joi.number().required(),
+    nameRU: Joi.string().required(),
+    nameEN: Joi.string().required(),
   }),
 }), addNewMovie);
 router.delete('/:movieId', celebrate({
   params: Joi.object().keys({
-    movieId: Joi.string().hex().length(24),
+    movieId: Joi.number(),
   }),
 }), delMovie);
 
