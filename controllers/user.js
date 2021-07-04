@@ -41,10 +41,7 @@ module.exports.infoUser = (req, res, next) => {
       }
       res
         .status(200)
-        .send({
-          email: user.email,
-          name: user.name,
-        });
+        .send(user);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
