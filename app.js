@@ -49,7 +49,14 @@ app.use(errorLogger);
 app.use('*', require('./routes/notFound'));
 
 app.use(errors());
-app.use(errorHeandler);
+app.use((err, req, res, next) => {
+  if (err.statusCode) {
+    res.status(err.statusCode).send({ message: err.message });
+  } else {
+    res.status(500).send({ message: 'Что-то пошло не так.' });
+  }
+  if (next) next();
+});
 
 app.listen(PORT, () => {
   // eslint-disable-next-line no-console

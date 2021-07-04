@@ -8,6 +8,30 @@ const NotFoundError = require('../errors/not-found-err');
 const IncorrentTokenError = require('../errors/incorrentTokenError');
 const ConflictError = require('../errors/ConflictError');
 
+module.exports.newUser = (req, res, next) => {
+  bcrypt.hash(req.body.password, 10)
+    .then((hash) => User.create({
+      email: req.body.email,
+      name: req.body.name,
+      password: hash,
+    }))
+    .then((user) => res.status(201).send({
+      email: user.email,
+      name: user.name,
+    }))
+    .catch((err) => {
+      if (err.name === 'MongoError' && err.code === 11000) {
+        throw new ConflictError('Данный пользователь уже зарегистрирован');
+      } else if ((err.name === 'CastError') || (err.name === 'ValidationError')) {
+        throw new IncorrectDataError('Переданы некорректные данные');
+      } else if (err.message === 'NotFound') {
+        throw new NotFoundError('Ресурс не найден');
+      }
+      next(err);
+    })
+    .catch(next);
+};
+
 module.exports.infoUser = (req, res, next) => {
   User.findById({ _id: req.user._id })
     .orFail(() => new Error('NotFound'))
@@ -73,26 +97,3 @@ module.exports.login = (req, res, next) => {
     .catch(next);
 };
 
-module.exports.newUser = (req, res, next) => {
-  bcrypt.hash(req.body.password, 10)
-    .then((hash) => User.create({
-      email: req.body.email,
-      name: req.body.name,
-      password: hash, // записываем хеш в базу
-    }))
-    .then((user) => res.status(201).send({
-      email: user.email,
-      name: user.name,
-    }))
-    .catch((err) => {
-      if (err.name === 'MongoError' && err.code === 11000) {
-        throw new ConflictError('Данный пользователь уже зарегистрирован');
-      } else if ((err.name === 'CastError') || (err.name === 'ValidationError')) {
-        throw new IncorrectDataError('Переданы некорректные данные');
-      } else if (err.message === 'NotFound') {
-        throw new NotFoundError('Ресурс не найден');
-      }
-      next(err);
-    })
-    .catch(next);
-};
