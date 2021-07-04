@@ -8,7 +8,7 @@ const {
 } = process.env;
 const { errors } = require('celebrate');
 const { celebrate, Joi } = require('celebrate');
-const { newUser, login } = require('../controllers/user');
+const { newUser, login } = require('./controllers/user');
 
 const { requestLogger, errorLogger } = require('./middlewares/logger');
 const errorHeandler = require('./middlewares/error-heandler');
