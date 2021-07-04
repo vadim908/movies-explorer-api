@@ -56,14 +56,14 @@ module.exports.addNewMovie = (req, res, next) => {
 };
 
 module.exports.delMovie = (req, res, next) => {
-  const { movieId } = req.params.movieId;
-  Movie.findOne(movieId)
+
+  Movie.findOne(req.params.movieId)
     .orFail(() => new Error('NotFound'))
     .then((movie) => {
       if (!movie) {
         throw new NotFoundError('Фильм не найден');
-      } else if (movie.owner.toString() === req.user._id) {
-        return Movie.deleteOne(movieId, { runValidators: true, new: true })
+      } else if ((movie.owner._id).toString() === req.user._id) {
+        return Movie.findByIdAndRemove(req.params.movieId, { runValidators: true, new: true })
           .then(() => {
             res.send(movie);
           });
