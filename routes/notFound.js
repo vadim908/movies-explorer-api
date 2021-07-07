@@ -1,7 +1,7 @@
 const router = require('express').Router();
 const { errorHandler } = require('../utils/errorHandler');
 
-router.use('*', (req, res) => {
+router.all('/*', (req, res) => {
   errorHandler(
     res,
     404,
