@@ -7,4 +7,4 @@ https://github.com/vadim908/movies-explorer-frontend
 3. ip4 сервера
 130.193.39.181
 4. Ссылка на размещенный сервер 
-https://vadim.dip.nomoredomains.icu/signup
+https://vadim.d.nomoredomains.icu/signup
